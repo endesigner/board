@@ -3,10 +3,11 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/App.js",
-    "bundle": "browserify -t [ babelify --presets [ react ] ] ./src/App.js -o ./dist/bundle.js",
+    "bundle": "start=$(date +%s); make; echo Bundling took $(expr `date +%s` - $start)s",
     "watch": "nodemon -w ./src -x npm run bundle"
   },
   "dependencies": {
+    "babel-preset-es2015": "^6.5.0",
     "babel-preset-react": "^6.3.13",
     "babelify": "^7.2.0",
     "react": "^0.14.7",

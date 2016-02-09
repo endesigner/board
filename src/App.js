@@ -55,18 +55,23 @@ Board.prototype.toString = function(){
   return this.state;
 }
 
-function Ticket(subject, body) {
-  this.subject = subject || 'defsubject';
-  this.body = body || 'defbody';
-}
-Ticket.prototype.setBody = function(str) {
-  this.body = str;
-}
-Ticket.prototype.setSubject = function(str) {
-  this.subject = str;
-}
-Ticket.prototype.toString = function() {
-  return this.subject + ':' +  this.body;
+class Ticket {
+  constructor (subject, body) {
+    this.subject = subject || 'defsubject';
+    this.body = body || 'defbody';
+  }
+
+  setBody (str) {
+    this.body = str;
+  }
+
+  setSubject (str) {
+    this.subject = str;
+  }
+
+  toString () {
+    return this.subject + ':' +  this.body;
+  }
 }
 
 var BoardColumn = React.createClass({
@@ -113,27 +118,30 @@ var BoardComponent = React.createClass({
     return (<div>{rows}</div>);
   }
 });
-var ControlsComponent = React.createClass({
-  componentWillMount: function() {
-    this.setState(this.props);
-  },
-  render: function() {
+
+// Controls to add tickets to the Board
+class ControlsComponent extends React.Component {
+  componentWillMount () {
+    this.state = this.props;
+  }
+
+  render () {
     return (
       <form>
         <input type="text" />
       </form>
     );
   }
-});
+}
 
-var App = React.createClass({
-  componentWillMount: function(){
+class App extends React.Component {
+  componentWillMount () {
     this.setState({
       board: this.props.board,
     });
-  },
+  }
 
-  render: function(){
+  render () {
     return (
       <div>
         <ControlsComponent board={this.state.board} />
@@ -141,7 +149,7 @@ var App = React.createClass({
       </div>
     );
   }
-});
+}
 
 var root = document.createElement('div');
 document.body.appendChild(root);
