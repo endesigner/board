@@ -12,6 +12,7 @@ function Board(rows, columns) {
 Board.prototype.addTicket = function(ticket){
   console.log(ticket);
   this.tickets.push(ticket);
+  this.notify();
   return this.tickets.length - 1;
 };
 Board.prototype.getTicket = function(ticket_id){
@@ -164,7 +165,6 @@ var ControlsComponent = React.createClass({
     let ticket = new Ticket(this.state.subject, this.state.body),
       ticket_id = this.props.board.addTicket(ticket);
 
-    console.log('tsr');
     this.setState({
       subject: '',
       body: ''
@@ -190,6 +190,44 @@ var ControlsComponent = React.createClass({
   }
 });
 
+var TicketBackLogComponent = React.createClass({
+  componentWillMount: function() {
+    this.props.board.subscribe(this.onBoardUpdate);
+    this.setState(this.props);
+  },
+
+  onBoardUpdate: function() {
+    console.log('board update');
+    this.forceUpdate();
+  },
+
+  render: function() {
+    var tickets = this.state.board.tickets;
+    tickets = tickets.map((ticket) => {
+      return (
+        <TicketComponent {...ticket} />
+      );
+    });
+
+    console.log(tickets);
+    return (
+      <div>{tickets}</div>
+    );
+  }
+});
+
+/**
+ * Stateless component.
+ * Renders basic ticket.
+ */
+var TicketComponent = function() {
+  var props = [].shift.call(arguments);
+
+  return (
+    <div>{props.subject}:{props.body}</div>
+  );
+};
+
 /**
  * Stateless component.
  * Root node. Container for Board and its controls.
@@ -201,6 +239,7 @@ function App() {
   return (
     <div>
       <ControlsComponent board={ board } />
+      <TicketBackLogComponent board={ board } />
       <BoardComponent board={ board } />
     </div>
   );
@@ -211,8 +250,10 @@ var root = document.createElement('div');
 document.body.appendChild(root);
 
 var board = new Board(2,1);
-var ticket = new Ticket('subject', 'body');
-var ticket_id = board.addTicket(ticket);
-board.move(ticket_id, 0, 0);
+/*
+ *var ticket = new Ticket('subject', 'body');
+ *var ticket_id = board.addTicket(ticket);
+ *board.move(ticket_id, 0, 0);
+ */
 
 ReactDOM.render(<App board={board} />, root);
