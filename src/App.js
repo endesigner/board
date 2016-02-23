@@ -5,14 +5,20 @@ function Board(rows, columns) {
   this.tickets = [];
   this.rows = rows;
   this.columns = columns;
+  this.subscribers = [];
 
   this.state = this.buildState(rows, columns)
 }
 Board.prototype.addTicket = function(ticket){
+  console.log(ticket);
   this.tickets.push(ticket);
   return this.tickets.length - 1;
 };
 Board.prototype.getTicket = function(ticket_id){
+  if (this.tickets[ticket_id] === undefined) {
+    throw new Error('No ticket with id ' + ticket_id);
+  }
+
   return this.tickets[ticket_id];
 };
 
@@ -50,7 +56,20 @@ Board.prototype.move = function(ticket_id, row, column) {
       }
     }
   }
+
+  this.notify();
 }
+
+Board.prototype.subscribe = function(subscriber) {
+  this.subscribers.push(subscriber);
+}
+
+Board.prototype.notify = function() {
+  this.subscribers.forEach(function(subscriber){
+    subscriber();
+  });
+}
+
 Board.prototype.toString = function(){
   return this.state;
 }
@@ -82,10 +101,12 @@ var BoardColumn = React.createClass({
   render: function(){
     var col = this.state.col,
         board = this.state.board;
+
     var tickets = col.map(function(ticket_id){
       var t = board.getTicket(ticket_id);
       return (<span>{t.toString()}</span>);
     });
+
     return (<div>{tickets}</div>);
   }
 });
@@ -108,8 +129,15 @@ var BoardRow = React.createClass({
 
 var BoardComponent = React.createClass({
   componentWillMount: function(){
+    // Register callback to listen for board state changes.
+    this.props.board.subscribe(this.onBoardUpdate);
     this.setState(this.props);
   },
+
+  onBoardUpdate: function(){
+    this.forceUpdate();
+  },
+
   render: function(){
     var board = this.state.board;
     var rows = board.state.map(function(row){
@@ -119,37 +147,50 @@ var BoardComponent = React.createClass({
   }
 });
 
-// Controls to add tickets to the Board
-class ControlsComponent extends React.Component {
-  componentWillMount () {
-    this.state = this.props;
-  }
+/**
+ * Controls to add tickets to the Board
+ * Stateless component.
+ */
+function ControlsComponent() {
+  this.props = [].shift.call(arguments);
+  this.board = this.props.board;
+  this.subject = '';
+  this.body = 'body';
 
-  render () {
-    return (
-      <form>
-        <input type="text" />
-      </form>
-    );
-  }
+  return (
+    <form onSubmit={this.onSubmit.bind(this)}>
+      <input type="text" onChange={this.onChange.bind(this)} />
+    </form>
+  );
 }
 
-class App extends React.Component {
-  componentWillMount () {
-    this.setState({
-      board: this.props.board,
-    });
-  }
-
-  render () {
-    return (
-      <div>
-        <ControlsComponent board={this.state.board} />
-        <BoardComponent board={ this.state.board } />
-      </div>
-    );
-  }
+ControlsComponent.prototype.onSubmit = function(event) {
+  event.preventDefault();
+  var ticket = new Ticket(this.subject, this.body);
+  var ticket_id = this.board.addTicket(ticket);
+  this.board.move(ticket_id, 0, 0);
+  console.log(ticket_id);
 }
+
+ControlsComponent.prototype.onChange = function(event) {
+  this.subject = event.target.value;
+}
+
+/**
+ * Stateless component.
+ */
+function App() {
+  var props = [].shift.call(arguments),
+      board = props.board;
+
+  return (
+    <div>
+      <ControlsComponent board={ board } />
+      <BoardComponent board={ board } />
+    </div>
+  );
+}
+var App = React.createFactory(App);
 
 var root = document.createElement('div');
 document.body.appendChild(root);

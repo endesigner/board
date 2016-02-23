@@ -3,8 +3,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/App.js",
-    "bundle": "start=$(date +%s); make; echo Bundling took $(expr `date +%s` - $start)s",
-    "watch": "nodemon -w ./src -x npm run bundle"
+    "bundle": "make",
+    "bundle:fast": "start=$(date +%s); make fast; echo Bundling took $(expr `date +%s` - $start)s",
+    "watch": "nodemon -w ./src -x npm run bundle:fast"
   },
   "dependencies": {
     "babel-preset-es2015": "^6.5.0",
