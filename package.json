@@ -2,10 +2,10 @@
   "name": "grid",
   "main": "index.js",
   "scripts": {
-    "start": "node src/App.js",
+    "start": "http-server",
     "bundle": "make",
-    "bundle:fast": "start=$(date +%s); make fast; echo Bundling took $(expr `date +%s` - $start)s",
-    "watch": "nodemon -w ./src -x npm run bundle:fast"
+    "build": "npm run bundle",
+    "build:watch": "nodemon -w ./src -x npm run bundle"
   },
   "dependencies": {
     "babel-preset-es2015": "^6.5.0",

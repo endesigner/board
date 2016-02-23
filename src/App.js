@@ -151,33 +151,48 @@ var BoardComponent = React.createClass({
  * Controls to add tickets to the Board
  * Stateless component.
  */
-function ControlsComponent() {
-  this.props = [].shift.call(arguments);
-  this.board = this.props.board;
-  this.subject = '';
-  this.body = 'body';
+var ControlsComponent = React.createClass({
+  getInitialState: function(){
+    return {
+      subject: this.props.subject,
+      body: this.props.body
+    }
+  },
 
-  return (
-    <form onSubmit={this.onSubmit.bind(this)}>
-      <input type="text" onChange={this.onChange.bind(this)} />
-    </form>
-  );
-}
+  onSubmit: function(event) {
+    event.preventDefault();
+    let ticket = new Ticket(this.state.subject, this.state.body),
+      ticket_id = this.props.board.addTicket(ticket);
 
-ControlsComponent.prototype.onSubmit = function(event) {
-  event.preventDefault();
-  var ticket = new Ticket(this.subject, this.body);
-  var ticket_id = this.board.addTicket(ticket);
-  this.board.move(ticket_id, 0, 0);
-  console.log(ticket_id);
-}
+    console.log('tsr');
+    this.setState({
+      subject: '',
+      body: ''
+    });
+  },
 
-ControlsComponent.prototype.onChange = function(event) {
-  this.subject = event.target.value;
-}
+  onSubjectChange: function(event) {
+    this.setState({subject: event.target.value});
+  },
+
+  onBodyChange: function(event) {
+    this.setState({body: event.target.value});
+  },
+
+  render: function() {
+    return (
+      <form onSubmit={this.onSubmit}>
+        <input type="text" value={this.state.subject} onChange={this.onSubjectChange} />
+        <input type="text" value={this.state.body} onChange={this.onBodyChange} />
+        <input type="submit" />
+      </form>
+    );
+  }
+});
 
 /**
  * Stateless component.
+ * Root node. Container for Board and its controls.
  */
 function App() {
   var props = [].shift.call(arguments),
